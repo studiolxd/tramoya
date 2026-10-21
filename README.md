@@ -10,7 +10,7 @@ de diseño.
 | Parte | API |
 |---|---|
 | Flujo de escenas, transiciones con telón, pausa, perfil del jugador | `createGame` → `GameProvider`, `useGame`, `CurrentScene`, `isSceneId` |
-| Progreso en SCORM 1.2 (reanudar, puntuación, estado) y xAPI opcional | `createTracking` |
+| Progreso en SCORM 1.2 (reanudar, puntuación, estado), xAPI opcional y si hay LMS (`inLms`) | `createTracking` |
 | Textos adaptados a la forma de tratamiento | `GenderedText`, `resolveText` |
 | Comportamiento y accesibilidad, sin marcado | `useStageScale`, `useTypewriter`, `useDialogue`, `useSwipe`, `useAutoFocus`, `useMediaQuery`, `usePortrait`, `useReducedMotion`, `useCoarsePointer` |
 | Utilidades | `shuffle`, `withViewTransition` |
@@ -49,7 +49,7 @@ En desarrollo (`dev: true`): `?lms=local` instala un LMS SCORM 1.2 en
 Cada versión se publica como release de GitHub con el paquete compilado:
 
 ```sh
-pnpm add https://github.com/studiolxd/tramoya/releases/download/v0.1.0/studiolxd-tramoya-0.1.0.tgz
+pnpm add https://github.com/studiolxd/tramoya/releases/download/v0.2.0/studiolxd-tramoya-0.2.0.tgz
 ```
 
 Para desarrollar Tramoya y un juego a la vez, enlaza la copia local desde el

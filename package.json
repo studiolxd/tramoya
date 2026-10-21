@@ -1,6 +1,6 @@
 {
   "name": "@studiolxd/tramoya",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Studio LXD graphic adventure engine: scenes, progress, SCORM/xAPI tracking and unstyled interaction hooks. Games bring their own design system.",
   "type": "module",
   "repository": {
