@@ -22,6 +22,11 @@ export interface GameDefinition<S extends string> {
   progressWeight: Record<S, number>
   /** Scene where a first session starts; `lmsName` is the learner's name inside an LMS. */
   initialScene: (context: { lmsName: string | null }) => S
+  /**
+   * Optional title screen shown on every load. It is not saved as the current
+   * scene: from it, `start()` resumes the saved scene or begins the game.
+   */
+  titleScene?: S
   /** Duration of each half of a scene change (fade out, then fade in), in ms. */
   transitionMs: number
   tracking: Tracking
@@ -44,6 +49,10 @@ export interface GameContextValue<S extends string> {
   paused: boolean
   /** Resolves a text for the chosen form of address. */
   text: (text: GenderedText) => string
+  /** Whether the LMS has progress from a previous session to resume. */
+  hasProgress: boolean
+  /** Goes to the scene to resume, or to the first scene without progress (e.g. from the title scene). */
+  start: () => void
 }
 
 export interface GameProviderProps<S extends string> {
@@ -71,6 +80,7 @@ export interface Game<S extends string> {
 export function createGame<S extends string>({
   progressWeight,
   initialScene,
+  titleScene,
   transitionMs,
   tracking,
 }: GameDefinition<S>): Game<S> {
@@ -85,7 +95,12 @@ export function createGame<S extends string>({
     // Inside an LMS the learner's name comes from it.
     const [lmsName] = useState(tracking.learnerName)
     const [playerName, setPlayerNameState] = useState<string | null>(lmsName ?? saved?.name ?? null)
-    const [sceneId, setSceneId] = useState<S>(() => startScene ?? saved?.at ?? initialScene({ lmsName }))
+    // Where the game goes on: the saved scene, or the first one.
+    const [entryScene] = useState<S>(() => startScene ?? saved?.at ?? initialScene({ lmsName }))
+    const [hasProgress] = useState(
+      () => saved !== null && (saved.done.length > 0 || saved.at !== initialScene({ lmsName })),
+    )
+    const [sceneId, setSceneId] = useState<S>(() => (startScene === undefined && titleScene) || entryScene)
     const [gender, setGenderState] = useState<Gender>(saved?.gender ?? 'neutral')
     const [curtainClosed, setCurtainClosed] = useState(true)
     const [sceneReady, setSceneReady] = useState(false)
@@ -94,8 +109,10 @@ export function createGame<S extends string>({
       name: lmsName ? null : (saved?.name ?? null),
       gender: saved?.gender ?? null,
       done: saved?.done ?? [],
-      at: sceneId,
+      // The title scene is never saved: progress stays on the scene to resume.
+      at: entryScene,
     })
+    const onTitle = useRef(sceneId === titleScene)
     const reportedScene = useRef<S | null>(null)
 
     // A first session starts as "incomplete" with 0% progress.
@@ -142,10 +159,15 @@ export function createGame<S extends string>({
     const goTo = useCallback((next: S) => {
       if (transitioning.current) return
       transitioning.current = true
-      // Leaving a scene completes it.
+      // Leaving a scene completes it; leaving the title scene does not.
       const current = progress.current
-      const done = progressWeight[current.at] > 0 && !current.done.includes(current.at)
-      progress.current = { ...current, done: done ? [...current.done, current.at] : current.done, at: next }
+      const done = !onTitle.current && progressWeight[current.at] > 0 && !current.done.includes(current.at)
+      onTitle.current = next === titleScene
+      progress.current = {
+        ...current,
+        done: done ? [...current.done, current.at] : current.done,
+        at: onTitle.current ? current.at : next,
+      }
       store.save(progress.current)
       setCurtainClosed(true)
       setTimeout(() => {
@@ -156,9 +178,24 @@ export function createGame<S extends string>({
 
     const text = useCallback((value: GenderedText) => resolveText(value, gender), [gender])
 
+    const start = useCallback(() => goTo(entryScene), [goTo, entryScene])
+
     const value = useMemo<GameContextValue<S>>(
-      () => ({ sceneId, playerName, setPlayerName, gender, setGender, goTo, sceneReady, curtainClosed, paused, text }),
-      [sceneId, playerName, setPlayerName, gender, setGender, goTo, sceneReady, curtainClosed, paused, text],
+      () => ({
+        sceneId,
+        playerName,
+        setPlayerName,
+        gender,
+        setGender,
+        goTo,
+        sceneReady,
+        curtainClosed,
+        paused,
+        text,
+        hasProgress,
+        start,
+      }),
+      [sceneId, playerName, setPlayerName, gender, setGender, goTo, sceneReady, curtainClosed, paused, text, hasProgress, start],
     )
 
     return <GameContext value={value}>{children}</GameContext>
