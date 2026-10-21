@@ -27,7 +27,7 @@ export { useDialogue, type Dialogue } from './hooks/useDialogue.ts'
 export { useCoarsePointer, useMediaQuery, usePortrait, useReducedMotion } from './hooks/useMediaQuery.ts'
 export { useStageScale } from './hooks/useStageScale.ts'
 export { useSwipe, type Swipe, type SwipeDirection } from './hooks/useSwipe.ts'
-export { useTypewriter, type Typewriter } from './hooks/useTypewriter.ts'
+export { useTypewriter, type TypewriterPace, type Typewriter } from './hooks/useTypewriter.ts'
 
 // Utilities
 export { shuffle } from './utils/shuffle.ts'

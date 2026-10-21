@@ -10,7 +10,18 @@ interface TypewriterOptions {
   charDelayMs: number
   /** Pause after the end of a sentence. */
   sentencePauseMs: number
+  /**
+   * Follows an external clock instead (e.g. a voice-over): the text is typed
+   * at an even pace that lasts `durationMs`, measured against `elapsedMs()`,
+   * so timer delays never add up. Without it, charDelayMs and sentencePauseMs apply.
+   */
+  pace?: TypewriterPace
   onDone?: () => void
+}
+
+export interface TypewriterPace {
+  durationMs: number
+  elapsedMs: () => number
 }
 
 export interface Typewriter<T extends Element> {
@@ -39,6 +50,7 @@ export function useTypewriter<T extends Element = HTMLElement>({
   paused = false,
   charDelayMs,
   sentencePauseMs,
+  pace,
   onDone,
 }: TypewriterOptions): Typewriter<T> {
   const reducedMotion = useReducedMotion()
@@ -65,9 +77,14 @@ export function useTypewriter<T extends Element = HTMLElement>({
 
   useEffect(() => {
     if (done || paused) return
-    const timer = setTimeout(() => setShown((count) => count + 1), delayBefore(text, shown, charDelayMs, sentencePauseMs))
+    // With a pace, the next character is due when the clock reaches its share
+    // of the duration: behind, it catches up at once; ahead, it waits.
+    const delay = pace
+      ? Math.max(0, ((shown + 1) * pace.durationMs) / Math.max(text.length, 1) - pace.elapsedMs())
+      : delayBefore(text, shown, charDelayMs, sentencePauseMs)
+    const timer = setTimeout(() => setShown((count) => count + 1), delay)
     return () => clearTimeout(timer)
-  }, [done, paused, shown, text, charDelayMs, sentencePauseMs])
+  }, [done, paused, shown, text, charDelayMs, sentencePauseMs, pace])
 
   const notifyDone = useEffectEvent(() => onDone?.())
   useEffect(() => {
