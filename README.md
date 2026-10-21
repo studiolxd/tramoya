@@ -49,7 +49,7 @@ En desarrollo (`dev: true`): `?lms=local` instala un LMS SCORM 1.2 en
 Cada versión se publica como release de GitHub con el paquete compilado:
 
 ```sh
-pnpm add https://github.com/studiolxd/tramoya/releases/download/v0.4.0/studiolxd-tramoya-0.4.0.tgz
+pnpm add https://github.com/studiolxd/tramoya/releases/download/v0.5.0/studiolxd-tramoya-0.5.0.tgz
 ```
 
 Para desarrollar Tramoya y un juego a la vez, enlaza la copia local desde el
