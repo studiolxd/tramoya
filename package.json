@@ -1,0 +1,58 @@
+{
+  "name": "@studiolxd/tramoya",
+  "version": "0.1.0",
+  "description": "Studio LXD graphic adventure engine: scenes, progress, SCORM/xAPI tracking and unstyled interaction hooks. Games bring their own design system.",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/studiolxd/tramoya.git"
+  },
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./placeholders": {
+      "types": "./dist/node/placeholders.d.ts",
+      "default": "./dist/node/placeholders.js"
+    }
+  },
+  "bin": {
+    "tramoya": "./dist/node/cli.js"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "oxlint",
+    "pack:release": "pnpm build && pnpm pack"
+  },
+  "dependencies": {
+    "@studiolxd/scorm": "^2.0.1",
+    "@studiolxd/xapi": "^1.0.0",
+    "fflate": "^0.8.3"
+  },
+  "peerDependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "sharp": ">=0.34.0"
+  },
+  "peerDependenciesMeta": {
+    "sharp": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "oxlint": "^1.88.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "sharp": "^0.35.5",
+    "typescript": "~6.0.3"
+  },
+  "packageManager": "pnpm@11.18.0"
+}
